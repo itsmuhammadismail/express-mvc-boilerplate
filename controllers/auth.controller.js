@@ -112,14 +112,14 @@ const logout = asyncHandler(async (req, res) => {
   // On client, also delete the accessToken
 
   const cookies = req.cookies;
-  if (!cookies?.jwt) return res.status(204); //No content
+  if (!cookies?.jwt) return res.status(204).json({ status: "success" }); //No content
   const refreshToken = cookies.jwt;
 
   // Is refreshToken in db?
   const foundUser = await User.findOne({ refreshToken });
   if (!foundUser) {
     res.clearCookie("jwt", { httpOnly: true, sameSite: "None", secure: true });
-    return res.status(204);
+    return res.status(204).json({ status: "success" });
   }
 
   // Delete refreshToken in db
@@ -127,7 +127,7 @@ const logout = asyncHandler(async (req, res) => {
   const result = await foundUser.save();
 
   res.clearCookie("jwt", { httpOnly: true, sameSite: "None", secure: true });
-  res.status(204);
+  res.status(204).json({ status: "success" });
 });
 
 // @desc    Authenticate a user
@@ -144,7 +144,7 @@ const newToken = asyncHandler(async (req, res) => {
   jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
     if (err || foundUser._id !== decoded._id) return res.status(403);
     const accessToken = generateAccessToken(foundUser._id);
-    res.status(201).json({ accessToken });
+    res.status(201).json({ accessToken, status: "success" });
   });
 });
 
